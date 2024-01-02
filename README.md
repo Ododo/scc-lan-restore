@@ -6,7 +6,7 @@ Aims to restore the ability to play LAN mode on Splinter Cell Conviction after s
 
 1. ByPassed LAN menu blocked with error message "The Splinter Cell Conviction server is not available at this time, please try again later." [**OK**]
 
-2. Able to discover Lan sessions [**OK**]
+2. Able to discover and host Lan sessions [**OK**]
 
 3. Able to Join a session [**OK**]
 
@@ -36,7 +36,7 @@ The game used to request some configuration from gconnect.ubi.com on port 3074, 
    **You will need to keep this powershell window open whil playing the game.**
 
 # What does the python script do and why do i need to run as administrator
-  The administrator priviliedges are required because the script relies on hooking UDP packets used by the game and modifying them before they are sent through the interface and to the LAN.
+  The administrator priviliedges are required because the script relies on hooking some inbound UDP packets used by the game and modifying them before they are handled by the game.
   There are 2 parts: a socket server listening on port 3074 and answering the game HTTP requests.
   The hook part which aims to fix the UDP discovery reply sent by the game host telling "i'm currently hosting a game, and those are the infos to connect". It will edit the packets so that your game client will be able to join.
 
