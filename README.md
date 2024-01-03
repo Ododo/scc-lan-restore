@@ -1,6 +1,10 @@
 # scc-lan-restore
 Aims to restore the ability to play LAN mode on Splinter Cell Conviction after servers shutdown.
 
+# UPDATES
+
+03/01/2024: v2 includes important fixes for "Unable to Join the Match. The connection is not responding", please update script.
+
 # Current Status
 [NEED TESTING]
 
