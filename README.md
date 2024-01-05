@@ -3,8 +3,8 @@ Aims to restore the ability to play LAN mode on Splinter Cell Conviction after s
 
 # UPDATES
 
-03/01/2024: v2 includes important fixes for "Unable to Join the Match. The connection is not responding", please update script.
-05/01/2024: added [windows executable](https://github.com/Ododo/scc-lan-restore/releases/) as alternative to installing python.
+- 03/01/2024: v2 includes important fixes for "Unable to Join the Match. The connection is not responding", please update script.
+- 05/01/2024: added [windows executable](https://github.com/Ododo/scc-lan-restore/releases/) as alternative to installing python.
 
 # Current Status
 [NEED TESTING]
