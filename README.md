@@ -31,8 +31,8 @@ Windows 10/11, tested on Windows 11 only.
 The game used to request some configuration from gconnect.ubi.com on port 3074, but this service is no longer active (altough it is still active but now on port 80 :D... But serving from localhost is more futureproof as we don't rely on external services.). This is what actually blocked the LAN menu.
 
 4. The workaround currently relies on a Python script. You can either run it from Python following theses steps below, or run directly as administator the [executable](https://github.com/Ododo/scc-lan-restore/releases/) created with pyintaller.
-   * Install Python3 (with windows store for example) along with pip https://pip.pypa.io/en/stable/installation/,
-   * Install pip package pydivert `python3 -m pip install pydivert`
+   * Install Python3 preferably from [https://www.python.org/](https://www.python.org/downloads/windows/), check "Add Python to PATH", select "Customize installation" and check "[pip](https://pip.pypa.io/en/stable/installation/)".
+   * Install pip package pydivert `pip install pydivert` or `python -m pip install pydivert`
    * Download scc_lan_helper.py from this repository.
    * Then open Windows terminal or powershell *as administrator*, and run the service with
    `> python scc_lan_helper.py` and that's it..
