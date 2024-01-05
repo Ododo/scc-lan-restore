@@ -4,6 +4,7 @@ Aims to restore the ability to play LAN mode on Splinter Cell Conviction after s
 # UPDATES
 
 03/01/2024: v2 includes important fixes for "Unable to Join the Match. The connection is not responding", please update script.
+05/01/2024: added [windows executable](https://github.com/Ododo/scc-lan-restore/releases/) as alternative to installing python.
 
 # Current Status
 [NEED TESTING]
@@ -14,12 +15,10 @@ Aims to restore the ability to play LAN mode on Splinter Cell Conviction after s
 
 3. Able to Join a session [**OK**]
 
-4. Play the Game
-
-I was able to start a match with 2 PCs at Home, However i'm getting out of sync or
-remote client disconnected.
-It might be because one of my PCs is very weak compared to the other and struggles to run the game.
-This is why i need other people to test this workaround
+4. Play the Game  
+Several people reported the fix as working and were able to play.
+Still out-of-sync or remote client disconnected issues with some people (like me), legend says it is related to running AMD versus Intel CPUs, but i'm not
+convinced of this theory yet.
 
 # Instructions
 Windows 10/11, tested on Windows 11 only. 
@@ -31,13 +30,13 @@ Windows 10/11, tested on Windows 11 only.
   What it does is that it will tell the game to look for 127.0.0.1 when it is trying to connect to gconnect.ubi.com. We will handle instead the request from the game as 127.0.0.1 is our local machine.
 The game used to request some configuration from gconnect.ubi.com on port 3074, but this service is no longer active (altough it is still active but now on port 80 :D... But serving from localhost is more futureproof as we don't rely on external services.). This is what actually blocked the LAN menu.
 
-4. The workaround currently relies on a python script.
+4. The workaround currently relies on a Python script. You can either run it from Python following theses steps below, or run directly as administator the [executable](https://github.com/Ododo/scc-lan-restore/releases/) created with pyintaller.
    * Install Python3 (with windows store for example) along with pip https://pip.pypa.io/en/stable/installation/,
    * Install pip package pydivert `python3 -m pip install pydivert`
    * Download scc_lan_helper.py from this repository.
    * Then open Windows terminal or powershell *as administrator*, and run the service with
    `> python scc_lan_helper.py` and that's it..
-   **You will need to keep this powershell window open whil playing the game.**
+   **You will need to keep the program window open while playing the game.**
 
 # What does the python script do and why do i need to run as administrator
   The administrator priviliedges are required because the script relies on hooking some inbound UDP packets used by the game and modifying them before they are handled by the game.
