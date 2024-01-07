@@ -30,7 +30,7 @@ Windows 10/11, tested on Windows 11 only.
   What it does is that it will tell the game to look for 127.0.0.1 when it is trying to connect to gconnect.ubi.com. We will handle instead the request from the game as 127.0.0.1 is our local machine.
 The game used to request some configuration from gconnect.ubi.com on port 3074, but this service is no longer active (altough it is still active but now on port 80 :D... But serving from localhost is more futureproof as we don't rely on external services.). This is what actually blocked the LAN menu.
 
-4. The workaround currently relies on a Python script. You can either run it from Python following theses steps below, or run directly as administator the [executable](https://github.com/Ododo/scc-lan-restore/releases/) created with pyintaller.
+4. The workaround currently relies on a Python script. You can either run it from Python following theses steps below, or run directly as administator the [executable](https://github.com/Ododo/scc-lan-restore/releases/) created with pyinstaller.
    * Install Python3 preferably from [https://www.python.org/](https://www.python.org/downloads/windows/), check "Add Python to PATH", select "Customize installation" and check "[pip](https://pip.pypa.io/en/stable/installation/)".
    * Install pip package pydivert `pip install pydivert` or `python -m pip install pydivert`
    * Download scc_lan_helper.py from this repository.
@@ -45,6 +45,7 @@ The game used to request some configuration from gconnect.ubi.com on port 3074, 
 
 # Test results, troubleshooting
 General protection faults on Windows 10, possible solutions:
+- Plug in both microphone and headphones
 - Try this guide: https://steamcommunity.com/sharedfiles/filedetails/?id=271381800
 - Use legal copy of the game (Steam, ubisoft,...)
 - Upgrade to Windows 11
