@@ -1,5 +1,5 @@
 # scc-lan-restore
-Aims to restore the ability to play LAN mode on Splinter Cell Conviction after servers shutdown.
+Restores LAN mode on Splinter Cell Conviction after servers shutdown.
 
 # UPDATES
 
@@ -15,10 +15,14 @@ Aims to restore the ability to play LAN mode on Splinter Cell Conviction after s
 
 3. Able to Join a session [**OK**]
 
-4. Play the Game  
-Several people reported the fix as working and were able to play.
-Still out-of-sync or remote client disconnected issues with some people (like me), legend says it is related to running AMD versus Intel CPUs, but i'm not
-convinced of this theory yet.
+4. Play the Game [**OK**]  
+The fix appears to work for most people.
+
+5. Out-of-sync or remote client disconnected issues.  
+This is an issue not related to the lan restore fix, but i'm doing some investigations nevertheless.
+The problematic code was identified but not fully understood, i will maybe write somewhere what i collected
+so far.  
+Legend says it is related to running AMD Ryzen versus Intel CPUs or older AMD cpus.
 
 # Instructions
 Windows 10/11, tested on Windows 11 only. 
@@ -28,7 +32,8 @@ Windows 10/11, tested on Windows 11 only.
 
 2. You will need to edit *C:\Windows\System32\drivers\etc\hosts* and add `127.0.0.1 gconnect.ubi.com` at the bottom. Then open powershell and type `ipconfig /flushdns`  
   What it does is that it will tell the game to look for 127.0.0.1 when it is trying to connect to gconnect.ubi.com. We will handle instead the request from the game as 127.0.0.1 is our local machine.
-The game used to request some configuration from gconnect.ubi.com on port 3074, but this service is no longer active (altough it is still active but now on port 80 :D... But serving from localhost is more futureproof as we don't rely on external services.). This is what actually blocked the LAN menu.
+The game used to request some configuration from gconnect.ubi.com on port 3074, but this service is now on port 80. Serving from localhost is more futureproof as we don't rely on external services.
+This is what actually blocked the LAN menu.
 
 4. The workaround currently relies on a Python script. You can either run it from Python following theses steps below, or run directly as administator the [executable](https://github.com/Ododo/scc-lan-restore/releases/) created with pyinstaller.
    * Install Python3 preferably from [https://www.python.org/](https://www.python.org/downloads/windows/), check "Add Python to PATH", select "Customize installation" and check "[pip](https://pip.pypa.io/en/stable/installation/)".
@@ -45,6 +50,7 @@ The game used to request some configuration from gconnect.ubi.com on port 3074, 
 
 # Test results, troubleshooting
 General protection faults on Windows 10, possible solutions:
+- Install [Virtual Audio Cable](https://vb-audio.com/Cable/) (reported working on https://github.com/Ododo/scc-lan-restore/issues/2)
 - Plug in both microphone and headphones
 - Try this guide: https://steamcommunity.com/sharedfiles/filedetails/?id=271381800
 - Use legal copy of the game (Steam, ubisoft,...)
