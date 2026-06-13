@@ -18,9 +18,9 @@ Run as root: sudo python fix_lan_packet_linux.py
 
 import socket
 import datetime
-import struct
 from netfilterqueue import NetfilterQueue
-from scapy.all import IP, UDP, Raw, bytes_hex
+from scapy.all import IP, UDP, Raw
+from log import logger_zh, logger_en
 
 
 def get_timestamp():
@@ -29,7 +29,6 @@ def get_timestamp():
 
 def fix_packet(pkt):
     """Called by nfqueue for every matching packet."""
-    from scapy.all import IP, UDP
 
     raw = pkt.get_payload()
     scapy_pkt = IP(raw)
@@ -52,16 +51,24 @@ def fix_packet(pkt):
     print(f"[{get_timestamp()}]")
 
     if is_inbound and is_search_packet:
-        print(
-            f"[EN] Receive packet: client (your partner)'s search request from {src_addr}"
+        logger_zh.info(f"收到数据包：\n来自客户端（队友） {src_addr} 的房间搜索请求\n")
+        logger_en.info(
+            f"Receive packet: client (your partner)'s search request from {src_addr}\n"
         )
     elif is_outbound and is_search_packet:
-        print(f"[EN] Send packet: game broadcast search packet using {src_addr}")
+        logger_zh.info(f"发送数据包：\n游戏从 {src_addr} 广播发出房间搜索数据包\n")
+        logger_en.info(f"Send packet: game broadcast search packet using {src_addr}\n")
     elif is_inbound and is_hostinfo_packet:
-        print(f"[EN] Receive packet: host (your partner)'s info packet from {src_addr}")
+        logger_zh.info(f"收到数据包：\n来自房主（队友） {src_addr} 的房间信息数据包\n")
+        logger_en.info(
+            f"Receive packet: host (your partner)'s info packet from {src_addr}\n"
+        )
     elif is_outbound and is_hostinfo_packet:
-        print(
-            f"[EN] Send packet: game broadcast host info packet (to your partner) using {src_addr}"
+        logger_zh.info(
+            f"发送数据包：\n游戏从 {src_addr} 广播发出房间信息数据包（给队友）\n"
+        )
+        logger_en.info(
+            f"Send packet: game broadcast host info packet (to your partner) using {src_addr}\n"
         )
 
     # Only modify inbound host info packets
@@ -93,7 +100,8 @@ def fix_packet(pkt):
 
         payload[0x5B] = 2  # 1 ip + 1
 
-        print(f"[EN] Change host IP in info packet to: {partner_ip}")
+        logger_zh.info(f"将房间信息中的房主IP改为: {partner_ip}\n")
+        logger_en.info(f"Change host IP in info packet to: {partner_ip}\n")
 
         # Rebuild scapy packet with modified payload
         scapy_pkt[UDP].remove_payload()
@@ -105,12 +113,15 @@ def fix_packet(pkt):
         scapy_pkt = IP(bytes(scapy_pkt))
 
         pkt.set_payload(bytes(scapy_pkt))
-        print("[EN] Packet forwarded to game!")
+
+        logger_zh.info("数据包已转发给游戏！")
+        logger_en.info("Packet forwarded to game!")
     else:
         if is_outbound:
-            print("[EN] Packet forwarded to network adapter.")
+            logger_zh.info("数据包已转发给网卡。")
+            logger_en.info("Packet forwarded to network adapter.")
 
-    print()
+    print("\n")
     pkt.accept()
 
 
@@ -126,24 +137,34 @@ def get_local_ip():
         return "127.0.0.1"
 
 
-def packet_hook():
-    print("[EN] Start monitoring UDP port 46000 packets...")
-    print(f"[EN] Local IP detected as: {get_local_ip()}")
-    print()
-    print("Make sure iptables rules are set:")
-    print("  sudo iptables -I INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 0")
-    print("  sudo iptables -I OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 0")
-    print()
+def linux_packet_hook():
+    logger_zh.info(
+        "开始对搜索房间、加入房间等行为进行抓包，请确认后续日志中的ip地址是否正确，如需修改游戏使用的网卡，请参考README\n"
+    )
+    logger_en.info(
+        "Start monitoring packets for searching for and connecting to sessions, please check if ip address is correct in later logs, and refer to README to change the preferred network interface\n"
+    )
+
+    logger_zh.info(f"检测到本地 IP 为: {get_local_ip()}\n")
+    logger_en.info(f"Local IP detected as: {get_local_ip()}\n")
+
+    logger_zh.info(
+        "请确保已设置 iptables 规则：\n  sudo iptables -I INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 0\n  sudo iptables -I OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 0\n"
+    )
+    logger_en.info(
+        "Make sure iptables rules are set:\n  sudo iptables -I INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 0\n  sudo iptables -I OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 0\n"
+    )
 
     nfqueue = NetfilterQueue()
     nfqueue.bind(0, fix_packet)
     try:
         nfqueue.run()
     except KeyboardInterrupt:
-        print("\nStopping packet hook...")
+        logger_zh.info("\n正在停止抓包...")
+        logger_en.info("\nStopping packet hook...")
     finally:
         nfqueue.unbind()
 
 
 if __name__ == "__main__":
-    packet_hook()
+    linux_packet_hook()
