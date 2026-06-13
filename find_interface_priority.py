@@ -4,31 +4,47 @@ import sys
 
 
 def find_broadcast_priority():
-    # The game uses the interface that has the smallest hop count to 255.255.255.255
-    # On Linux, we bypass this Windows-specific 'route print' command.
-    if sys.platform != "win32":
-        return ""
+    """
+    Finds the network interface with the smallest hop count (metric) to 255.255.255.255.
+    Works natively on both Windows and Linux.
+    """
+    if sys.platform == "win32":
+        try:
+            result = subprocess.run(["route", "print"], capture_output=True, text=True)
+            pattern = re.compile(
+                r"^\s*255\.255\.255\.255\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)\s*$",
+                re.MULTILINE,
+            )
+            matches = pattern.findall(result.stdout)
 
-    try:
-        result = subprocess.run(["route", "print"], capture_output=True, text=True)
-        output = result.stdout
+            best_match = None
+            for match in matches:
+                # match[3] is the metric, match[2] is the interface IP
+                if not best_match or int(match[3]) < int(best_match[3]):
+                    best_match = match
 
-        pattern = re.compile(
-            r"^\s*255\.255\.255\.255\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)\s*$", re.MULTILINE
-        )
-        matches = pattern.findall(output)
-        result = None
-        for match in matches:
-            netmask, gateway, interface, metric = match
-            if not result or int(metric) < int(result[3]):
-                result = match
-        if result is None:
+            return best_match[2] if best_match else ""
+
+        except FileNotFoundError:
             return ""
-        return result[2]
-    except FileNotFoundError:
-        return ""
+    elif sys.platform.startswith("linux"):
+        try:
+            result = subprocess.run(
+                ["ip", "route", "get", "255.255.255.255"],
+                capture_output=True,
+                text=True,
+            )
+
+            # Output typically includes "dev <interface_name>" (e.g., "dev eth0")
+            match = re.search(r"dev\s+(\S+)", result.stdout)
+            return match.group(1) if match else ""
+
+        except FileNotFoundError:
+            return ""
+
+    # Fallback
+    return ""
 
 
 if __name__ == "__main__":
     print(find_broadcast_priority())
-
