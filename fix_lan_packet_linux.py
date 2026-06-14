@@ -21,7 +21,14 @@ def rule_exists(chain, rule):
     return r.returncode == 0
 
 
-nfqueue = NetfilterQueue()
+try:
+    nfqueue = NetfilterQueue()
+except OSError as e:
+    if "failed to bind" in str(e).lower():
+        logger_zh.info("错误：请使用 root 权限运行此程序\n")
+        logger_en.info("Error: please run this program as root.\n")
+    raise
+
 RULE_INPUT = "-p udp --dport 46000 -j NFQUEUE --queue-num 7654"
 RULE_OUTPUT = "-p udp --dport 46000 -j NFQUEUE --queue-num 7654"
 INPUT_MISSING = not rule_exists("INPUT", RULE_INPUT)
