@@ -2,8 +2,6 @@ import threading
 
 from find_interface_priority import find_broadcast_priority
 from bypass_server_check import server_check_hook
-from fix_lan_packet import packet_hook
-from fix_lan_packet_linux import linux_packet_hook
 from log import logger_zh, logger_en
 import sys
 
@@ -25,9 +23,11 @@ if __name__ == "__main__":
 
     # start lan packet fixing thread
     if sys.platform.startswith("linux"):
+        from fix_lan_packet_linux import linux_packet_hook
         hook_thread = threading.Thread(target=linux_packet_hook)
         hook_thread.start()
     elif sys.platform.startswith("win"):
+        from fix_lan_packet import packet_hook
         hook_thread = threading.Thread(target=packet_hook)
         hook_thread.start()
 
