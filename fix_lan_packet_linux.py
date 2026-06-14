@@ -1,7 +1,7 @@
 """
 Linux port of fix_lan_packet.py from scc-lan-restore
 Uses nfqueue (netfilter) instead of pydivert (Windows-only)
-Run as root: sudo python fix_lan_packet_linux.py
+Run as root: python fix_lan_packet_linux.py
 """
 
 import atexit
@@ -17,9 +17,7 @@ def rule_exists(chain, rule):
     """
     Checks if the iptables exists, this is for cleanup so we can delete them if they didn't exist prior to launch.
     """
-    r = subprocess.run(
-        f"sudo iptables -C {chain} {rule}", shell=True, capture_output=True
-    )
+    r = subprocess.run(f"iptables -C {chain} {rule}", shell=True, capture_output=True)
     return r.returncode == 0
 
 
@@ -147,13 +145,13 @@ def get_local_ip():
 def linux_packet_hook():
     if INPUT_MISSING:
         subprocess.run(
-            "sudo iptables -I INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
+            "iptables -I INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
             shell=True,
             check=True,
         )
     if OUTPUT_MISSING:
         subprocess.run(
-            "sudo iptables -I OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
+            "iptables -I OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
             shell=True,
             check=True,
         )
@@ -185,25 +183,18 @@ def cleanup():
     nfqueue.unbind()
     if INPUT_MISSING:
         subprocess.run(
-            "sudo iptables -D INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
+            "iptables -D INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
             shell=True,
         )
     if OUTPUT_MISSING:
         subprocess.run(
-            "sudo iptables -D OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
+            "iptables -D OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
             shell=True,
         )
 
 
-def start_nfqueue_module():
-    result = subprocess.run(
-        "lsmod | grep nfnetlink_queue", shell=True, capture_output=True
-    )
-    if result.returncode != 0:
-        subprocess.run("sudo modprobe nfnetlink_queue", shell=True, check=True)
-
-
 if __name__ == "__main__":
     atexit.register(cleanup)
-    start_nfqueue_module()
+    # run the nfnetqueue module
+    subprocess.run("modprobe nfnetlink_queue", shell=True, check=True)
     linux_packet_hook()
