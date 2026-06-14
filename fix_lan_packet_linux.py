@@ -1,26 +1,33 @@
 """
 Linux port of fix_lan_packet.py from scc-lan-restore
 Uses nfqueue (netfilter) instead of pydivert (Windows-only)
-
-Requirements:
-    pip install scapy NetfilterQueue
-
-Before running, set up iptables rules:
-    sudo iptables -I INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 0
-    sudo iptables -I OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 0
-
-To remove rules after playing:
-    sudo iptables -D INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 0
-    sudo iptables -D OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 0
-
 Run as root: sudo python fix_lan_packet_linux.py
 """
 
+import atexit
 import socket
 import datetime
+import subprocess
 from netfilterqueue import NetfilterQueue
 from scapy.all import IP, UDP, Raw
 from log import logger_zh, logger_en
+
+
+def rule_exists(chain, rule):
+    """
+    Checks if the iptables exists, this is for cleanup so we can delete them if they didn't exist prior to launch.
+    """
+    r = subprocess.run(
+        f"sudo iptables -C {chain} {rule}", shell=True, capture_output=True
+    )
+    return r.returncode == 0
+
+
+nfqueue = NetfilterQueue()
+RULE_INPUT = "-p udp --dport 46000 -j NFQUEUE --queue-num 7654"
+RULE_OUTPUT = "-p udp --dport 46000 -j NFQUEUE --queue-num 7654"
+INPUT_MISSING = not rule_exists("INPUT", RULE_INPUT)
+OUTPUT_MISSING = not rule_exists("OUTPUT", RULE_OUTPUT)
 
 
 def get_timestamp():
@@ -138,6 +145,18 @@ def get_local_ip():
 
 
 def linux_packet_hook():
+    if INPUT_MISSING:
+        subprocess.run(
+            "sudo iptables -I INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
+            shell=True,
+            check=True,
+        )
+    if OUTPUT_MISSING:
+        subprocess.run(
+            "sudo iptables -I OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
+            shell=True,
+            check=True,
+        )
     logger_zh.info(
         "开始对搜索房间、加入房间等行为进行抓包，请确认后续日志中的ip地址是否正确，如需修改游戏使用的网卡，请参考README\n"
     )
@@ -148,23 +167,43 @@ def linux_packet_hook():
     logger_zh.info(f"检测到本地 IP 为: {get_local_ip()}\n")
     logger_en.info(f"Local IP detected as: {get_local_ip()}\n")
 
-    logger_zh.info(
-        "请确保已设置 iptables 规则：\n  sudo iptables -I INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 0\n  sudo iptables -I OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 0\n"
-    )
-    logger_en.info(
-        "Make sure iptables rules are set:\n  sudo iptables -I INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 0\n  sudo iptables -I OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 0\n"
-    )
-
-    nfqueue = NetfilterQueue()
-    nfqueue.bind(0, fix_packet)
+    nfqueue.bind(7654, fix_packet)
     try:
         nfqueue.run()
     except KeyboardInterrupt:
         logger_zh.info("\n正在停止抓包...")
         logger_en.info("\nStopping packet hook...")
     finally:
-        nfqueue.unbind()
+        cleanup()
+
+
+def cleanup():
+    """
+    Unbinds nfqueue and deletes the iptables rules if they were missing prior to script launched.
+    """
+
+    nfqueue.unbind()
+    if INPUT_MISSING:
+        subprocess.run(
+            "sudo iptables -D INPUT  -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
+            shell=True,
+        )
+    if OUTPUT_MISSING:
+        subprocess.run(
+            "sudo iptables -D OUTPUT -p udp --dport 46000 -j NFQUEUE --queue-num 7654",
+            shell=True,
+        )
+
+
+def start_nfqueue_module():
+    result = subprocess.run(
+        "lsmod | grep nfnetlink_queue", shell=True, capture_output=True
+    )
+    if result.returncode != 0:
+        subprocess.run("sudo modprobe nfnetlink_queue", shell=True, check=True)
 
 
 if __name__ == "__main__":
+    atexit.register(cleanup)
+    start_nfqueue_module()
     linux_packet_hook()
