@@ -21,6 +21,12 @@ if __name__ == "__main__":
             "Failed to find what IP the game will likely use, check later logs for real IP\n"
         )
 
+    # start cpu affinity fix thread to mitigate coop out-of-sync errors (issue #3)
+    if "--no-affinity-fix" not in sys.argv:
+        from fix_cpu_affinity import affinity_hook
+        affinity_thread = threading.Thread(target=affinity_hook, daemon=True)
+        affinity_thread.start()
+
     # start lan packet fixing thread
     if sys.platform.startswith("linux"):
         from fix_lan_packet_linux import linux_packet_hook

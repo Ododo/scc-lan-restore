@@ -26,7 +26,8 @@ The fix appears to work for most people.
 This is an issue not related to the lan restore fix, but i'm doing some investigations nevertheless.
 The problematic code was identified but not fully understood, i will maybe write somewhere what i collected
 so far.  
-Legend says it is related to running AMD Ryzen versus Intel CPUs or older AMD cpus.
+Legend says it is related to running AMD Ryzen versus Intel CPUs or older AMD cpus.  
+An experimental mitigation based on community findings is now included in the script, see [Out-of-sync mitigation](#out-of-sync-mitigation-experimental) below.
 
 # Instructions
 Windows 10/11, tested on Windows 10 and 11.
@@ -67,6 +68,16 @@ Windows 10/11, tested on Windows 10 and 11.
 
   When running the script, some helpful logs will be printed to help debugging. For example, if you can't find or join another session, check if you and your friend's IP address used by the game are mutually reachable. (Usually IPs of the same subnet like 192.168.1.x are reachable. Keyword to search for is *route table*.)
 
+
+# Out-of-sync mitigation (experimental)
+
+Testing in [issue #3](https://github.com/Ododo/scc-lan-restore/issues/3) showed that coop desyncs largely disappear when both machines run the game with Hyper-Threading/SMT and Intel E-cores disabled in the BIOS, i.e. when the game only runs on one hardware thread per physical performance core. The coop mode replays inputs on both machines and requires both sides to keep a fixed frame pace, so game threads migrating between SMT siblings or efficiency cores appears to cause the timing divergence that triggers the "out of sync" error.
+
+The script now reproduces this setup automatically without BIOS changes: while running, it watches for the game process and pins it to the first hardware thread of each physical performance core (E-cores excluded on Intel hybrid CPUs). **Both players** should run the script for best results. No configuration is needed; the log will show a line like `Game process detected (pid xxxx), pinned it to physical performance cores` once the game is running.
+
+If you suspect this causes problems (e.g. lower fps), you can disable it by running the script with the `--no-affinity-fix` argument.
+
+This mitigation is experimental — please report in [issue #3](https://github.com/Ododo/scc-lan-restore/issues/3) whether it improves things for your CPU combination.
 
 # Test results, troubleshooting
 General protection faults on Windows 10, possible solutions:
