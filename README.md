@@ -6,6 +6,7 @@ Restores LAN mode on Splinter Cell Conviction after servers shutdown.
 
 # UPDATES
 
+- 03/08/2026: DLL-based fix available (no Python, no admin rights, works on Steam Deck) — see [scc-lan-fix](https://github.com/Maksidrol/scc-lan-fix)
 - 09/01/2025: v3 update instruction and script, discovering and joining Lan sessions is more stable. Also add detailed logs (also come in chinese version) to help troubleshooting. please update script. 
 - 03/01/2024: v2 includes important fixes for "Unable to Join the Match. The connection is not responding", please update script.
 - 05/01/2024: added [windows executable](https://github.com/Ododo/scc-lan-restore/releases/) as alternative to installing python.
@@ -59,6 +60,17 @@ Windows 10/11, tested on Windows 10 and 11.
      `python scc_lan_helper.py` and that's it.
    
    **You will need to keep the program window open while playing the game.** You can run the program at any time without having to restart the game, all changes take effect immediately.
+
+## Alternative: DLL-based fix (no Python, no admin rights required)
+
+[scc-lan-fix](https://github.com/Maksidrol/scc-lan-fix) is a DLL-based alternative built on the same research.
+
+**Advantages:**
+- No Python, no admin rights, no `/etc/hosts` editing
+- Works on Steam Deck/Linux via Proton out of the box
+- Auto-detects the correct network interface
+
+**Setup:** just drop `systemdetection.dll` next to `conviction_game.exe` and launch the game.
 
 # What does the python script do and why do i need to run as administrator
   The administrator privileges are required because the script relies on hooking some inbound UDP packets used by the game and modifying them before they are handled by the game.
